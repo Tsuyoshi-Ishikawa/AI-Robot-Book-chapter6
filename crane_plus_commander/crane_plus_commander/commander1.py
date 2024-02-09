@@ -24,8 +24,16 @@ class Commander(Node):
         self.publisher_gripper = self.create_publisher(
             JointTrajectory,
             'crane_plus_gripper_controller/joint_trajectory', 10)
+        # subscribeがないのは、別のノードでjoint_statesを使っているため
 
     def publish_joint(self, q, time):
+        # JointTrajectoryとJointTrajectoryPointを使って現在の関節から目標関節へ移動する軌道を作成している
+        # つまり、現在の関節値から目標関節値へ移動する軌道を作成しているだけで、そこから実際のトルク制御を行っているわけではない
+        # 実際のトルク制御は、別のノード(Subscriber)で行っている。
+
+        # subscriberが行なっていること
+        # 目標関節角度の軌跡からトルクを導出(逆運動学)し、それを実際の関節に与える
+        # 目標関節角度の軌跡作成するということは、開始状態から目標状態への経路上で、各時点での関節角度、角速度、加速度を計算するということ
         msg = JointTrajectory()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.joint_names = self.joint_names
@@ -37,6 +45,13 @@ class Commander(Node):
         self.publisher_joint.publish(msg)
 
     def publish_gripper(self, gripper, time):
+        # JointTrajectoryとJointTrajectoryPointを使って現在のグリッパーから目標グリッパーへ移動する軌道を作成している
+        # つまり、現在の関節値から目標関節値へ移動する軌道を作成しているだけで、そこから実際のトルク制御を行っているわけではない
+        # 実際のトルク制御は、別のノード(Subscriber)で行っている。
+
+        # subscriberが行なっていること
+        # 目標関節角度の軌跡からトルクを導出(逆運動学)し、それを実際の関節に与える
+        # 目標関節角度の軌跡作成するということは、開始状態から目標状態への経路上で、各時点での関節角度、角速度、加速度を計算するということ
         msg = JointTrajectory()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.joint_names = ['crane_plus_joint_hand']
